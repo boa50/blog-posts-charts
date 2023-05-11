@@ -60,7 +60,7 @@ annotate_point <- function(x, y, colour = "black", text_position = "left") {
       "point",
       x = {{ x }},
       y = {{ y }},
-      size = 5,
+      size = 3,
       colour = {{ colour }}
     ),
     annotate(
@@ -69,7 +69,7 @@ annotate_point <- function(x, y, colour = "black", text_position = "left") {
       x = {{ x }},
       y = {{ y }},
       colour = "black",
-      hjust = ifelse(text_position == "left", 1.5, -0.5)
+      hjust = ifelse(text_position == "left", 1.3, -0.3)
     )
   )
 }
@@ -78,7 +78,7 @@ annotate_point <- function(x, y, colour = "black", text_position = "left") {
 df <- read.csv("green-energy/global-energy-substitution.csv", 
                check.names = FALSE) %>% 
   clean_names() %>% 
-  filter(year >= 2011) %>% 
+  filter(year >= 2000) %>% 
   set_names(~ str_replace(., "_t_wh_substituted_energy", "")) %>% 
   select(-c(entity, code)) %>% 
   pivot_longer(!year, names_to = "energy_type", values_to = "consumption") %>% 
@@ -90,7 +90,7 @@ df <- read.csv("green-energy/global-energy-substitution.csv",
   group_by(year, energy_type) %>% 
   summarise(consumption = sum(consumption))
 
-point_annotations <- filter(df, year %in% c(2011, 2021))
+point_annotations <- filter(df, year %in% c(2000, 2021))
 
 annotate_energy_point <- function(x) {
   point <- point_annotations[x,]
@@ -105,18 +105,38 @@ annotate_energy_point <- function(x) {
     getElement(point, "year"), 
     getElement(point, "consumption"),
     colour = point_colour,
-    text_position = ifelse(getElement(point, "year") == 2011, "left", "right")
+    text_position = ifelse(getElement(point, "year") == 2000, "left", "right")
+  )
+}
+
+add_legend <- function(label, y, colour) {
+  annotate(
+    "text",
+    label = {{label}},
+    x = 2011,
+    y = {{y}},
+    colour = {{colour}},
+    hjust = 1,
+    fontface = "bold"
   )
 }
 
 ggplot(df, aes(x = year, y = consumption)) +
   geom_line(aes(colour = energy_type)) +
   map(1:4, annotate_energy_point) +
-  scale_x_continuous(breaks = c(2011, 2021),
+  labs(title = "Energy consumption since 2000",
+       subtitle = "The energy increased by x%. Energy values in TWh",
+       x = "Year", 
+       y = "Energy Consumption",
+       caption = "Source: https://ourworldindata.org/global-energy-200-years") +
+  add_legend("Non-renewables", y = 128000, colour = app_colours$nonrenewables) +
+  add_legend("Renewables", y = 6000, colour = app_colours$renewables) +
+  scale_x_continuous(breaks = c(2000, 2021),
                      expand = expansion(mult = 0.15)) +
   scale_y_continuous(limits = c(0, max(df$consumption))) +
   scale_colour_manual(values = c(app_colours$nonrenewables, 
                                  app_colours$renewables)) +
-  theme(axis.line.y = element_blank(),
+  theme(legend.position = "none",
+        axis.line.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank())
