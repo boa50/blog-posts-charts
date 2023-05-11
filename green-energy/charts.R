@@ -24,7 +24,9 @@ app_colours <- list(
   no_emphasis = "#8f8f8f",
   divergent = "#f57c00",
   line_main = "#42a5f5",
-  line_complementary = "#78909c"
+  line_complementary = "#78909c",
+  renewables = "#008B45",
+  nonrenewables = "#8B4500"
 )
 
 theme_minimalistic <- function() {
@@ -95,8 +97,8 @@ annotate_energy_point <- function(x) {
   
   point_colour <- ifelse(
     getElement(point, "energy_type") == "renewable",
-    "green",
-    "red"
+    app_colours$renewables,
+    app_colours$nonrenewables
   )
     
   annotate_point(
@@ -113,6 +115,8 @@ ggplot(df, aes(x = year, y = consumption)) +
   scale_x_continuous(breaks = c(2011, 2021),
                      expand = expansion(mult = 0.15)) +
   scale_y_continuous(limits = c(0, max(df$consumption))) +
+  scale_colour_manual(values = c(app_colours$nonrenewables, 
+                                 app_colours$renewables)) +
   theme(axis.line.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank())
