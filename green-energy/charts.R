@@ -26,7 +26,8 @@ app_colours <- list(
   line_main = "#42a5f5",
   line_complementary = "#78909c",
   renewables = "#008B45",
-  nonrenewables = "#8B4500"
+  nonrenewables = "#8B4500",
+  point_value = "#474747"
 )
 
 theme_minimalistic <- function() {
@@ -60,7 +61,7 @@ annotate_point <- function(x, y, colour = "black", text_position = "left") {
       "point",
       x = {{ x }},
       y = {{ y }},
-      size = 3,
+      size = 5,
       colour = {{ colour }}
     ),
     annotate(
@@ -68,8 +69,8 @@ annotate_point <- function(x, y, colour = "black", text_position = "left") {
       label = label_number(scale_cut = cut_short_scale())({{ y }}),
       x = {{ x }},
       y = {{ y }},
-      colour = "black",
-      hjust = ifelse(text_position == "left", 1.3, -0.3)
+      colour = app_colours$point_value,
+      hjust = ifelse(text_position == "left", 1.5, -0.5)
     )
   )
 }
@@ -122,7 +123,7 @@ add_legend <- function(label, y, colour) {
 }
 
 ggplot(df, aes(x = year, y = consumption)) +
-  geom_line(aes(colour = energy_type)) +
+  geom_line(aes(colour = energy_type), size = 2) +
   map(1:4, annotate_energy_point) +
   labs(title = "Energy consumption since 2000",
        subtitle = "The energy increased by x%. Energy values in TWh",
