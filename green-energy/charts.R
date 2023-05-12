@@ -6,11 +6,10 @@ library(purrr)
 library(stringr)
 library(scales)
 
-
 ### THEME
 library(ggtext)
 library(showtext)
-# font_add_google("Roboto", "roboto")
+font_add_google("Roboto", "roboto")
 showtext_auto()
 
 app_colours <- list(
@@ -86,12 +85,23 @@ df <- read.csv("green-energy/global-energy-substitution.csv",
   mutate(energy_type = ifelse(
     energy_type %in% c("other_renewables", "wind", "solar", "hydropower"),
     "renewable",
-    "non renewable"
+    "nonrenewable"
   )) %>% 
   group_by(year, energy_type) %>% 
   summarise(consumption = sum(consumption))
 
 point_annotations <- filter(df, year %in% c(2000, 2021))
+
+get_consumption_increase <- function(energy_type) {
+  stopifnot(energy_type %in% c("renewable", "nonrenewable"))
+  
+  tmp_df <- point_annotations %>% 
+    ungroup() %>% 
+    filter(energy_type == {{energy_type}}) %>% 
+    pull(consumption) 
+  
+  return(percent_format()((tmp_df[2] / tmp_df[1]) - 1))
+}
 
 annotate_energy_point <- function(x) {
   point <- point_annotations[x,]
@@ -126,18 +136,27 @@ ggplot(df, aes(x = year, y = consumption)) +
   geom_line(aes(colour = energy_type), size = 2) +
   map(1:4, annotate_energy_point) +
   labs(title = "Energy consumption since 2000",
-       subtitle = "The energy increased by x%. Energy values in TWh",
+       subtitle = paste0(
+         "Renewable energy consumption increased by ",
+         "<strong style = color:", app_colours$renewables, ";>",
+         get_consumption_increase("renewable"), 
+         "</strong>. ",
+         "Non-renewables, in contrast, grew by ",
+         "<strong style = color:", app_colours$nonrenewables, ";>",
+         get_consumption_increase("nonrenewable"), 
+         "</strong>."),
        x = "Year", 
-       y = "Energy Consumption",
+       y = "Energy Consumption (TWh)",
        caption = "Source: https://ourworldindata.org/global-energy-200-years") +
-  add_legend("Non-renewables", y = 128000, colour = app_colours$nonrenewables) +
-  add_legend("Renewables", y = 6000, colour = app_colours$renewables) +
+  add_legend("Non-renewable", y = 128000, colour = app_colours$nonrenewables) +
+  add_legend("Renewable", y = 6000, colour = app_colours$renewables) +
   scale_x_continuous(breaks = c(2000, 2021),
-                     expand = expansion(mult = 0.15)) +
+                     expand = expansion(mult = 0.1)) +
   scale_y_continuous(limits = c(0, max(df$consumption))) +
   scale_colour_manual(values = c(app_colours$nonrenewables, 
                                  app_colours$renewables)) +
   theme(legend.position = "none",
+        plot.margin = unit(rep(1, times = 4), "lines"),
         axis.line.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank())
