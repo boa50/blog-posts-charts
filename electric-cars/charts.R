@@ -49,7 +49,6 @@ theme_minimalistic <- function() {
 theme_set(theme_minimalistic())
 
 ### 01 - CAR SALES CHART
-# https://www.iea.org/data-and-statistics/charts/passenger-car-sales-2010-2022
 df_car_sales <- tibble(
   year = c(2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 
            2021, 2022),
@@ -70,7 +69,14 @@ df_car_sales %>%
     x = "",
     y = "Sales (in million)"
   ) +
-  scale_y_continuous(limits = c(60, 90)) +
+  annotate("rect", 
+           xmin = 2019, xmax = 2021, 
+           ymin = 60, ymax = 90,
+           fill = "#FF4500",
+           alpha = 0.3) +
+  annotate("text", x = 2020, y = 65, label = "COVID", colour = "#CD3700") +
+  scale_y_continuous(limits = c(60, 90),
+                     expand = expansion(mult = c(0, 0))) +
   scale_x_continuous(labels = number_format(accuracy = 1, big.mark = ""),
                      breaks = df$year)
 
@@ -99,7 +105,8 @@ df_greenhouse %>%
     caption = "Based on https://ourworldindata.org/emissions-by-sector"
   ) +
   geom_treemap_subgroup_border(colour = "white", size = 2) +
-  geom_treemap_text(colour = "white", size = 12, fontface = c("bold", rep("plain", 4))) +
+  geom_treemap_text(colour = "white", size = 12, fontface = c("bold", 
+                                                              rep("plain", 4))) +
   scale_fill_manual(values = c(app_colours$no_emphasis, 
                                app_colours$no_emphasis, 
                                app_colours$no_emphasis, 
