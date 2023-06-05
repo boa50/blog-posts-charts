@@ -16,7 +16,7 @@ app_colours <- list(
   subtitle = "#757575",
   caption = "#8f8f8f",
   main = "#1976d2",
-  no_emphasis = "#8f8f8f",
+  no_emphasis = "#CDC9C9",
   divergent = "#f57c00",
   line_main = "#42a5f5",
   line_complementary = "#78909c",
@@ -48,17 +48,16 @@ theme_minimalistic <- function() {
 
 theme_set(theme_minimalistic())
 
-### CAR SALES CHART 01
+### 01 - CAR SALES CHART
 # https://www.iea.org/data-and-statistics/charts/passenger-car-sales-2010-2022
-# IEA, Passenger car sales, 2010-2022, IEA, Paris https://www.iea.org/data-and-statistics/charts/passenger-car-sales-2010-2022, IEA. Licence: CC BY 4.0
-df <- tibble(
+df_car_sales <- tibble(
   year = c(2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 
            2021, 2022),
   sales = c(66.7, 71.2, 73.8, 77.5, 80.0, 81.8, 86.4, 86.3, 85.6, 81.3, 71.8,
             74.9, 74.8)
 )
 
-df %>% 
+df_car_sales %>% 
   ggplot(aes(x = year, y = sales)) +
   geom_line(colour = app_colours$main, linewidth = 1) +
   labs(
@@ -74,3 +73,36 @@ df %>%
   scale_y_continuous(limits = c(60, 90)) +
   scale_x_continuous(labels = number_format(accuracy = 1, big.mark = ""),
                      breaks = df$year)
+
+### 02 - GREENHOUSE EMISSION
+library(treemapify)
+
+df_greenhouse <- tibble(
+  macro_group = c("Energy", "Energy", "Land Use", "Industry", "Waste"),
+  group = c("Road Transport", "Other Energies", "Land Use", "Industry", "Waste"),
+  percentage = c(11.9, 61.3, 18.4, 5.2, 3.2)
+)
+
+df_greenhouse %>% 
+  ggplot(aes(area = percentage, fill = group, 
+             label = paste(group, 
+                           percent_format(scale = 1)(percentage), 
+                           sep = "\n"),
+             subgroup = macro_group)) +
+  geom_treemap() +
+  labs(
+    title = "Greenhouse gas emissions by sector",
+    subtitle = paste0("Road transport represents almost <strong style='color:", 
+                      app_colours$nonrenewables, ";'>12%</strong> of greenhouse",
+                      " gas emissions. It's more than the produced by Industry",
+                      " and Waste together."),
+    caption = "Based on https://ourworldindata.org/emissions-by-sector"
+  ) +
+  geom_treemap_subgroup_border(colour = "white", size = 2) +
+  geom_treemap_text(colour = "white", size = 12, fontface = c("bold", rep("plain", 4))) +
+  scale_fill_manual(values = c(app_colours$no_emphasis, 
+                               app_colours$no_emphasis, 
+                               app_colours$no_emphasis, 
+                               app_colours$nonrenewables, 
+                               app_colours$no_emphasis)) +
+  theme(legend.position = "none")
