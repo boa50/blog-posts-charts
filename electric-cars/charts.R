@@ -1,5 +1,6 @@
 library(ggplot2)
 library(dplyr)
+library(scales)
 
 ### THEME
 library(ggtext)
@@ -47,7 +48,7 @@ theme_minimalistic <- function() {
 
 theme_set(theme_minimalistic())
 
-### CAR SALES CHART
+### CAR SALES CHART 01
 # https://www.iea.org/data-and-statistics/charts/passenger-car-sales-2010-2022
 # IEA, Passenger car sales, 2010-2022, IEA, Paris https://www.iea.org/data-and-statistics/charts/passenger-car-sales-2010-2022, IEA. Licence: CC BY 4.0
 df <- tibble(
@@ -59,5 +60,17 @@ df <- tibble(
 
 df %>% 
   ggplot(aes(x = year, y = sales)) +
-  geom_line() +
-  scale_y_continuous(limits = c(60, 90))
+  geom_line(colour = app_colours$main, linewidth = 1) +
+  labs(
+    title = "Cars sales since 2010",
+    subtitle = paste0("Even with a decrease during COVID's worst days, car",
+                      " sales are stepping up again, reaching",
+                      " <strong style='color: ", app_colours$main,";'>",
+                      "74.8 million</strong> sales on 2022."),
+    caption = "Based on https://www.iea.org/data-and-statistics/charts/passenger-car-sales-2010-2022",
+    x = "",
+    y = "Sales (in million)"
+  ) +
+  scale_y_continuous(limits = c(60, 90)) +
+  scale_x_continuous(labels = number_format(accuracy = 1, big.mark = ""),
+                     breaks = df$year)
