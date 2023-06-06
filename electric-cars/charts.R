@@ -78,7 +78,7 @@ df_car_sales %>%
   scale_y_continuous(limits = c(60, 90),
                      expand = expansion(mult = c(0, 0))) +
   scale_x_continuous(labels = number_format(accuracy = 1, big.mark = ""),
-                     breaks = df$year)
+                     breaks = df_car_sales$year)
 
 ### 02 - GREENHOUSE EMISSION
 library(treemapify)
@@ -113,3 +113,31 @@ df_greenhouse %>%
                                app_colours$nonrenewables, 
                                app_colours$no_emphasis)) +
   theme(legend.position = "none")
+
+### 03 - CARS IN THE WORLD
+### Try to create some sort of infographic
+df_cars_capita <- tibble(
+  country = c("United States", "New Zealand", "Canada", "Cyprus", "Luxembourg",
+              "Australia", "Poland", "Italy", "Iceland", "Estonia"),
+  cars_per_capita = c(0.89, 0.88, 0.79, 0.79, 0.78,
+                      0.78, 0.77, 0.76, 0.72, 0.71)
+) %>% 
+  mutate(
+    country = factor(country, levels = country)
+  )
+
+df_cars_capita %>% 
+  ggplot(aes(x = country, y = cars_per_capita)) +
+  geom_col(fill = app_colours$main) +
+  labs(
+    title = "Top 10 countries with the higher number of cars per person",
+    subtitle = paste0("Some countries tend to have more particular cars than",
+                      " sharing them with others. Would it be good if",
+                      " everyone had their exclusive car?"),
+    caption = "Based on https://www.whichcar.com.au/news/how-many-cars-are-there-in-the-world",
+    x = "Country",
+    y = "Cars per person"
+  ) +
+  scale_y_continuous(expand = expansion(mult = 0),
+                     limits = c(0, 1),
+                     breaks = seq(from = 0, to = 1, by = 0.2))
