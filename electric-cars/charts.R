@@ -101,7 +101,7 @@ df_greenhouse %>%
   labs(
     title = "Greenhouse gas emissions by sector",
     subtitle = paste0("Road transport represents almost <strong style='color:", 
-                      app_colours$nonrenewables, ";'>12%</strong> of greenhouse",
+                      app_colours$nonrenewables, ";'> 12%</strong> of greenhouse",
                       " gas emissions. It's more than the produced by Industry",
                       " and Waste together."),
     caption = "Based on https://ourworldindata.org/emissions-by-sector"
