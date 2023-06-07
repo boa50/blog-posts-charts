@@ -1,5 +1,6 @@
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 library(scales)
 
 ### THEME
@@ -28,6 +29,7 @@ app_colours <- list(
 theme_minimalistic <- function() {
   theme_classic() +
     theme(
+      plot.margin = margin(rep(15, 4)),
       text = element_text(family = "roboto"),
       plot.title = element_text(hjust = 0, colour = app_colours$title),
       plot.title.position = "plot",
@@ -141,3 +143,57 @@ df_cars_capita %>%
   scale_y_continuous(expand = expansion(mult = 0),
                      limits = c(0, 1),
                      breaks = seq(from = 0, to = 1, by = 0.2))
+
+### 04 - ELECTRIC CAR SALES COMPARED TO NORMAL MODELS
+df_electric_car_sales <- df_car_sales %>% 
+  mutate(
+    electric = c(0, 0, 0.1, 0.2, 0.3, 0.5, 0.8, 1.2, 2.0, 
+                 2.0, 3.1, 6.6, 10.8),
+    other = sales - electric
+  ) %>% 
+  select(year, electric, other) %>% 
+  pivot_longer(cols = c(electric, other), 
+               names_to = "power_type", values_to = "quantity")
+
+df_electric_car_sales %>% 
+  ggplot(aes(x = year, y = quantity, 
+             fill = factor(power_type, levels = c("other", "electric")))) +
+  geom_area() +
+  labs(
+    title = "Cars sales by power type since 2010",
+    subtitle = paste0("Electric car sales had a dramatic increase since 2019",
+                      " reaching <strong style='color", app_colours$renewables,
+                      ";'>10.8 million</strong> sales in 2022."),
+    caption = "Based on https://www.iea.org/data-and-statistics/charts/passenger-car-sales-2010-2022",
+    x = "",
+    y = "Sales (in million)"
+  ) +
+  scale_y_continuous(limits = c(0, 90),
+                     expand = expansion(mult = c(0, 0))) +
+  scale_x_continuous(labels = number_format(accuracy = 1, big.mark = ""),
+                     breaks = df_car_sales$year,
+                     expand = expansion(mult = c(0, 0))) +
+  scale_fill_manual(values = c(app_colours$no_emphasis,
+                               app_colours$renewables),
+                    labels = paste0("<span style='color:",
+                                    c(app_colours$renewables, 
+                                      app_colours$no_emphasis),
+                                    "'>",
+                                    c("Electric", "Conventional"),
+                                    "</span>",
+                                    "<span> </span>",
+                                    "<span style='color:",
+                                    c("#474747",
+                                      "transparent"),
+                                    "'>",
+                                    "|",
+                                    "</span>")) +
+  theme(legend.position = "top",
+        legend.text = element_markdown(face = "bold", size = 12),
+        legend.justification = c(-.087, 0),
+        legend.margin = margin(),
+        legend.key.size = unit(1, units = "pt"),
+        legend.spacing.x = unit(3, units = "pt")) +
+  guides(fill = guide_legend(title = NULL,
+                             label.position = "left",
+                             override.aes = list(alpha = 0)))
